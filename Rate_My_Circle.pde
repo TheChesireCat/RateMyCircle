@@ -1,5 +1,6 @@
 //circle Circle;
-import java.math.BigInteger;
+import java.math.BigDecimal;
+import java.math.MathContext;
 
 ArrayList<Long> x=new ArrayList<Long>();
 ArrayList<Long> y=new ArrayList<Long>();
@@ -8,7 +9,7 @@ int N;
 
 
 
-BigInteger sum_x,sum_y,
+BigDecimal sum_x,sum_y,
            sum_xy,sum_x2,
            sum_y2,sum_eq1,
            sum_eq2,sum_eq3,H,K,R;
@@ -57,20 +58,33 @@ void draw(){
 
 
 void mouseReleased(){
- fill(255,200);
+  //noLoop();
+ fill(255,230);
  rectMode(CORNER);
  rect(0,height/7,width,height);
  
  //Calculations : 
- println("X Coordinates :");
- for(int i=0;i<N;i++){
-   println(x.get(i));
- }
- println("Y Coordinates :");
- for(int i=0;i<N;i++){
-   println(y.get(i));
- }
- calculateHKR();
+ 
+ long[] HKR=toHKR(calculateHKR());
+ noFill();
+ stroke(0,40);
+ strokeWeight(4);
+ ellipse(HKR[0],HKR[1],HKR[2]*2,HKR[2]*2);
+ //noLoop();
+// println("START AGAIN");
+ println("N :" + N);
+ println("R :" + HKR[2]);
+ //println("X Coordinates :");
+ //for(int i=0;i<N;i++){
+ // println(x.get(i));
+ //}
+ //println("Y Coordinates :");
+ //for(int i=0;i<N;i++){
+ // println(y.get(i));
+ //}
+ 
+ //println("---------------------------");
+ //exit();
  init();
 }
 
@@ -79,40 +93,40 @@ void init(){
   
   x=new ArrayList<Long>();
   y=new ArrayList<Long>();
-  sum_x=sum_y=sum_xy=sum_x2=sum_y2=sum_eq1=sum_eq2=sum_eq3=BigInteger.ZERO;
+  sum_x=sum_y=sum_xy=sum_x2=sum_y2=sum_eq1=sum_eq2=sum_eq3=BigDecimal.ZERO;
   N=0;
 }
 void add(long a,long b){
   x.add(a);
   y.add(b);
-  sum_x=sum_x.add(BigInteger.valueOf(a));
-  sum_y=sum_y.add(BigInteger.valueOf(b));
-  sum_x2=sum_x2.add(BigInteger.valueOf(a*a));
-  sum_y2=sum_y2.add(BigInteger.valueOf(b*b));
-  sum_xy=sum_xy.add(BigInteger.valueOf(a*b));
-  sum_eq1=sum_eq1.add(BigInteger.valueOf(a*(a*a+b*b)));
-  sum_eq2=sum_eq2.add(BigInteger.valueOf(b*(a*a+b*b)));
-  sum_eq3=sum_eq3.add(BigInteger.valueOf((a*a+b*b)));
+  sum_x=sum_x.add(BigDecimal.valueOf(a));
+  sum_y=sum_y.add(BigDecimal.valueOf(b));
+  sum_x2=sum_x2.add(BigDecimal.valueOf(a*a));
+  sum_y2=sum_y2.add(BigDecimal.valueOf(b*b));
+  sum_xy=sum_xy.add(BigDecimal.valueOf(a*b));
+  sum_eq1=sum_eq1.add(BigDecimal.valueOf(a*(a*a+b*b)));
+  sum_eq2=sum_eq2.add(BigDecimal.valueOf(b*(a*a+b*b)));
+  sum_eq3=sum_eq3.add(BigDecimal.valueOf((a*a+b*b)));
   N+=1;
 }      
-void calculateHKR2(){
-  
-}
-void calculateHKR(){
-  BigInteger[][] MatrixA={{sum_x2,sum_xy,sum_x},
+
+BigDecimal[] calculateHKR(){
+  BigDecimal[][] MatrixA={{sum_x2,sum_xy,sum_x},
                          {sum_xy,sum_y2,sum_y},
-                         {sum_x ,sum_y ,  new BigInteger(""+N)  }};                         
-  BigInteger[] MatrixB={sum_eq1,
+                         {sum_x ,sum_y ,  new BigDecimal(N)  }};                         
+  BigDecimal[] MatrixB={sum_eq1,
                         sum_eq2,
                         sum_eq3};
   // Calculate Inverse
-  
-  BigInteger[] MatrixC=lsolve(MatrixA,MatrixB);
-  
-  println("A : " + MatrixC[0] + " B : " + MatrixC[1] + " C : " + MatrixC[2]);
+  //println("START");
+  //for(int i=0;i<N;i++){
+  //  println("i: "+i+ " x: "+x.get(i)+" y: "+y.get(i));
+  //}
+  BigDecimal[] MatrixC=lsolve(MatrixA,MatrixB);
+  return MatrixC;
 }
 
-BigInteger[] lsolve(BigInteger A[][],BigInteger B[]){
+BigDecimal[] lsolve(BigDecimal A[][],BigDecimal B[]){
   int N=B.length;
   for(int p=0;p<N;p++){
     int max=p;
@@ -121,27 +135,48 @@ BigInteger[] lsolve(BigInteger A[][],BigInteger B[]){
         max=i;
       }
     }
-    BigInteger[] temp=A[p]; A[p] = A[max];A[max]=temp;
-    BigInteger   t   =B[p];B[p]=B[max];B[max]=t;
+    BigDecimal[] temp=A[p]; A[p] = A[max];A[max]=temp;
+    BigDecimal   t   =B[p];B[p]=B[max];B[max]=t;
     
     for(int i =p +1;i<N;i++){
-      BigInteger alpha = A[i][p].divide(A[p][p]);
-      B[i] = B[i].subtract(alpha.multiply(B[p]));
+     // println("A[p][p] = " + A[p][p]);
+      //println("A[i][p] = " + A[i][p]);      
+      BigDecimal alpha = A[i][p].divide(A[p][p],MathContext.DECIMAL128);
+      //println(alpha);
+      B[i] = B[i].subtract((alpha.multiply(B[p])));
+      //println("alpha := "+alpha +" B[p] := " + B[p]+" alpha.multiply(B[p]) := "+B[i]);
+      //println("B[i] := "+B[i]);
       for(int j=p;j<N;j++){
         A[i][j]=A[i][j].subtract(alpha.multiply(A[p][j]));
       }
     }
   }
   
-  BigInteger[] x = new BigInteger[N];
+  BigDecimal[] x = new BigDecimal[N];
   for (int i = N-1;i>=0;i--){
-    BigInteger sum= BigInteger.ZERO;
+    BigDecimal sum= BigDecimal.ZERO;
     for (int j=i+1;j<N;j++){
       sum=sum.add(A[i][j].multiply(x[j]));
     }
-    x[i] = B[i].subtract(sum).divide(A[i][i]);
+    x[i] = B[i].subtract(sum).divide(A[i][i],MathContext.DECIMAL128);
   }
+  
   return x;
+}
+long[] toHKR(BigDecimal x[]){
+  long[] HKR=new long[3];
+  HKR[0]=x[0].divide(new BigDecimal(2),MathContext.DECIMAL128).longValue();
+  HKR[1]=x[1].divide(new BigDecimal(2),MathContext.DECIMAL128).longValue();
+  HKR[2]=sqrt(x[2].multiply(new BigDecimal(4)).add(x[1].multiply(x[1])).add(x[0].multiply(x[0]))).divide(new BigDecimal(2),MathContext.DECIMAL128).longValue();
+  //println("h : " + HKR[0] +
+  //        "k : " + HKR[1] +
+  //        "r : " + HKR[2]);
+  return HKR;
+}
+
+BigDecimal sqrt(BigDecimal value) {
+    BigDecimal x = new BigDecimal(Math.sqrt(value.doubleValue()));
+    return x.add(new BigDecimal(value.subtract(x.multiply(x)).doubleValue() / (x.doubleValue() * 2.0)));
 }
 
 
