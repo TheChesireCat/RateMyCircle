@@ -1,17 +1,25 @@
 //circle Circle;
 import java.math.BigInteger;
-FloatList scores;
-BigInteger h,k,r;
-ArrayList<Long> x;
-ArrayList<Long> y;
-int n;
+
+ArrayList<Long> x=new ArrayList<Long>();
+ArrayList<Long> y=new ArrayList<Long>();
+
+int N;
+
+
+
+BigInteger sum_x,sum_y,
+           sum_xy,sum_x2,
+           sum_y2,sum_eq1,
+           sum_eq2,sum_eq3,H,K,R;
+
+
+
 void setup(){
   
   size(displayWidth,displayHeight);
   background(255);
   
-  scores = new FloatList();
-  scores.append(0.0);
   PFont zigFont;
   zigFont = createFont("zig.ttf",32);
   textFont(zigFont,32);
@@ -44,7 +52,6 @@ void draw(){
     add(mouseX,mouseY);
     fill(#1A5C8E);
     ellipse(mouseX,mouseY,20,20);
-    println(n);
   }
 }
 
@@ -55,84 +62,86 @@ void mouseReleased(){
  rect(0,height/7,width,height);
  
  //Calculations : 
- long a=calc_A();
- long b=calc_B();
- long c=calc_C();
- h=a/2;
- k=b/2;
- r=-(long)(sqrt(4*c+a*a+b*b))/2;
- noFill();
- stroke(0,40);
- ellipse(h,k,r,r);
- println("h =" + h +" k ="+k+" r ="+r);
  println("X Coordinates :");
- for(int i=0;i<n;i++){
+ for(int i=0;i<N;i++){
    println(x.get(i));
  }
  println("Y Coordinates :");
- for(int i=0;i<n;i++){
+ for(int i=0;i<N;i++){
    println(y.get(i));
  }
+ calculateHKR();
  init();
- println("size = "+n);
- println("START AGAIN");
 }
+
 
 void init(){
+  
   x=new ArrayList<Long>();
   y=new ArrayList<Long>();
-  sum_x=0;
-  sum_y=0;
-  sum_xy=0;
-  sum_x2=0;
-  sum_y2=0;
-  sum_eq1=0;
-  sum_eq2=0;
-  sum_eq3=0;
-  n=0;
+  sum_x=sum_y=sum_xy=sum_x2=sum_y2=sum_eq1=sum_eq2=sum_eq3=BigInteger.ZERO;
+  N=0;
 }
-
 void add(long a,long b){
   x.add(a);
   y.add(b);
-  sum_x+=a;
-  sum_y+=b;
-  sum_xy+=(a*b);
-  sum_x2+=(a*a);
-  sum_y2+=(b*b);   
-  sum_eq1+=(a*(a*a+b*b));
-  sum_eq2+=(b*(a*a+b*b));
-  sum_eq3+=(a*a+b*b);
-  n+=1;
+  sum_x=sum_x.add(BigInteger.valueOf(a));
+  sum_y=sum_y.add(BigInteger.valueOf(b));
+  sum_x2=sum_x2.add(BigInteger.valueOf(a*a));
+  sum_y2=sum_y2.add(BigInteger.valueOf(b*b));
+  sum_xy=sum_xy.add(BigInteger.valueOf(a*b));
+  sum_eq1=sum_eq1.add(BigInteger.valueOf(a*(a*a+b*b)));
+  sum_eq2=sum_eq2.add(BigInteger.valueOf(b*(a*a+b*b)));
+  sum_eq3=sum_eq3.add(BigInteger.valueOf((a*a+b*b)));
+  N+=1;
+}      
+void calculateHKR2(){
+  
+}
+void calculateHKR(){
+  BigInteger[][] MatrixA={{sum_x2,sum_xy,sum_x},
+                         {sum_xy,sum_y2,sum_y},
+                         {sum_x ,sum_y ,  new BigInteger(""+N)  }};                         
+  BigInteger[] MatrixB={sum_eq1,
+                        sum_eq2,
+                        sum_eq3};
+  // Calculate Inverse
+  
+  BigInteger[] MatrixC=lsolve(MatrixA,MatrixB);
+  
+  println("A : " + MatrixC[0] + " B : " + MatrixC[1] + " C : " + MatrixC[2]);
 }
 
-long calc_A(){
-  float A=(n*(sum_eq2)*(sum_xy) - (sum_eq2)*(sum_x)*(sum_y) - 
-      (sum_eq3)*(sum_xy)*(sum_y) + (sum_eq1)*pow(sum_y,2) - 
-      n*(sum_eq1)*(sum_y2) + (sum_eq3)*(sum_x)*(sum_y2))/
-   (n*pow(sum_xy,2) - 2*(sum_x)*(sum_xy)*(sum_y) + (sum_x2)*pow(sum_y,2) + 
-      pow(sum_x,2)*(sum_y2) - n*(sum_x2)*(sum_y2));
-  println("A: "+A);
-  return (long)A;
-}
-long calc_B(){
-  float B=((-(sum_eq2))*pow(sum_x,2) + n*(sum_eq2)*(sum_x2) - 
-      n*(sum_eq1)*(sum_xy) + (sum_eq3)*(sum_x)*(sum_xy) + 
-      (sum_eq1)*(sum_x)*(sum_y) - (sum_eq3)*(sum_x2)*(sum_y))/
-   ((-n)*pow(sum_xy,2) + 2*(sum_x)*(sum_xy)*(sum_y) - 
-      (sum_x2)*pow(sum_y,2) - pow(sum_x,2)*(sum_y2) + 
-  n*(sum_x2)*(sum_y2));
-  println("B: "+B);
-  return (long)B;
-}
-long calc_C(){
-  float C=((-(sum_eq2))*(sum_x)*(sum_xy) + (sum_eq3)*pow(sum_xy,2) + 
-      (sum_eq2)*(sum_x2)*(sum_y) - (sum_eq1)*(sum_xy)*(sum_y) + 
-      (sum_eq1)*(sum_x)*(sum_y2) - (sum_eq3)*(sum_x2)*(sum_y2))/
-   (n*pow(sum_xy,2) - 2*(sum_x)*(sum_xy)*(sum_y) + (sum_x2)*pow(sum_y,2) + 
-      pow(sum_x,2)*(sum_y2) - n*(sum_x2)*(sum_y2));
-      println("C: "+C);
-  return (long)C;    
+BigInteger[] lsolve(BigInteger A[][],BigInteger B[]){
+  int N=B.length;
+  for(int p=0;p<N;p++){
+    int max=p;
+    for(int i=p+1;i<N;i++){
+      if(A[i][p].abs().compareTo(A[max][p])==1){
+        max=i;
+      }
+    }
+    BigInteger[] temp=A[p]; A[p] = A[max];A[max]=temp;
+    BigInteger   t   =B[p];B[p]=B[max];B[max]=t;
+    
+    for(int i =p +1;i<N;i++){
+      BigInteger alpha = A[i][p].divide(A[p][p]);
+      B[i] = B[i].subtract(alpha.multiply(B[p]));
+      for(int j=p;j<N;j++){
+        A[i][j]=A[i][j].subtract(alpha.multiply(A[p][j]));
+      }
+    }
+  }
+  
+  BigInteger[] x = new BigInteger[N];
+  for (int i = N-1;i>=0;i--){
+    BigInteger sum= BigInteger.ZERO;
+    for (int j=i+1;j<N;j++){
+      sum=sum.add(A[i][j].multiply(x[j]));
+    }
+    x[i] = B[i].subtract(sum).divide(A[i][i]);
+  }
+  return x;
 }
 
 
