@@ -51,6 +51,7 @@ void draw(){
   
   if(mousePressed){
     add(mouseX,mouseY);
+    noStroke();
     fill(#1A5C8E);
     ellipse(mouseX,mouseY,20,20);
   }
@@ -58,33 +59,23 @@ void draw(){
 
 
 void mouseReleased(){
-  //noLoop();
+
  fill(255,230);
  rectMode(CORNER);
- rect(0,height/7,width,height);
+ noStroke();
+ rect(0,0,width,height);
  
  //Calculations : 
  
  long[] HKR=toHKR(calculateHKR());
  noFill();
- stroke(0,40);
- strokeWeight(4);
+ stroke(#7B92ED,200);
+ strokeWeight(10);
  ellipse(HKR[0],HKR[1],HKR[2]*2,HKR[2]*2);
- //noLoop();
-// println("START AGAIN");
+
  println("N :" + N);
  println("R :" + HKR[2]);
- //println("X Coordinates :");
- //for(int i=0;i<N;i++){
- // println(x.get(i));
- //}
- //println("Y Coordinates :");
- //for(int i=0;i<N;i++){
- // println(y.get(i));
- //}
- 
- //println("---------------------------");
- //exit();
+
  init();
 }
 
@@ -111,17 +102,14 @@ void add(long a,long b){
 }      
 
 BigDecimal[] calculateHKR(){
-  BigDecimal[][] MatrixA={{sum_x2,sum_xy,sum_x},
-                         {sum_xy,sum_y2,sum_y},
-                         {sum_x ,sum_y ,  new BigDecimal(N)  }};                         
+  BigDecimal[][] MatrixA={{sum_x2,  sum_xy,     sum_x           },
+                         { sum_xy,   sum_y2,    sum_y           },
+                         { sum_x ,   sum_y ,  new BigDecimal(N)  }};    
+                         
   BigDecimal[] MatrixB={sum_eq1,
                         sum_eq2,
                         sum_eq3};
-  // Calculate Inverse
-  //println("START");
-  //for(int i=0;i<N;i++){
-  //  println("i: "+i+ " x: "+x.get(i)+" y: "+y.get(i));
-  //}
+
   BigDecimal[] MatrixC=lsolve(MatrixA,MatrixB);
   return MatrixC;
 }
@@ -139,13 +127,8 @@ BigDecimal[] lsolve(BigDecimal A[][],BigDecimal B[]){
     BigDecimal   t   =B[p];B[p]=B[max];B[max]=t;
     
     for(int i =p +1;i<N;i++){
-     // println("A[p][p] = " + A[p][p]);
-      //println("A[i][p] = " + A[i][p]);      
       BigDecimal alpha = A[i][p].divide(A[p][p],MathContext.DECIMAL128);
-      //println(alpha);
       B[i] = B[i].subtract((alpha.multiply(B[p])));
-      //println("alpha := "+alpha +" B[p] := " + B[p]+" alpha.multiply(B[p]) := "+B[i]);
-      //println("B[i] := "+B[i]);
       for(int j=p;j<N;j++){
         A[i][j]=A[i][j].subtract(alpha.multiply(A[p][j]));
       }
@@ -168,9 +151,6 @@ long[] toHKR(BigDecimal x[]){
   HKR[0]=x[0].divide(new BigDecimal(2),MathContext.DECIMAL128).longValue();
   HKR[1]=x[1].divide(new BigDecimal(2),MathContext.DECIMAL128).longValue();
   HKR[2]=sqrt(x[2].multiply(new BigDecimal(4)).add(x[1].multiply(x[1])).add(x[0].multiply(x[0]))).divide(new BigDecimal(2),MathContext.DECIMAL128).longValue();
-  //println("h : " + HKR[0] +
-  //        "k : " + HKR[1] +
-  //        "r : " + HKR[2]);
   return HKR;
 }
 
