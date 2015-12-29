@@ -4,7 +4,7 @@ Processing sketch to analyse drawn circle accuracy.
 
 ```apk``` included in ```android/bin```
 
-*warning : JFLAG <sub><sub>just for laughs and gags</sub></sub>
-*
+_warning : JFLAG <sub><sub>just for laughs and gags</sub></sub>
+_
 
 <sup><sub>Made with ♥️ by Ankit Ramakrishnan</sub></sup>
