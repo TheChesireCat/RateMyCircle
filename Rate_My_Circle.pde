@@ -7,7 +7,7 @@ ArrayList<Long> y=new ArrayList<Long>();
 
 int N;
 
-
+long sumOfErrors=0;
 
 BigDecimal sum_x,sum_y,
            sum_xy,sum_x2,
@@ -24,7 +24,6 @@ void setup(){
   PFont zigFont;
   zigFont = createFont("zig.ttf",32);
   textFont(zigFont,32);
-  textSize(86);
   
   textSize(86);
   translate(width/2,150);
@@ -55,12 +54,20 @@ void draw(){
     fill(#1A5C8E);
     ellipse(mouseX,mouseY,20,20);
   }
+  
+  translate(20,6.9*height/7);
+  textAlign(LEFT);
+  fill(0);
+  textSize(20);
+  text("Made with ♥ by Ankit Ramakrishnan",0,0);
+  noFill();
+  translate(-20,-6.9*height/7);
 }
 
 
 void mouseReleased(){
-
- fill(255,230);
+ if(N>=3){
+ fill(255);
  rectMode(CORNER);
  noStroke();
  rect(0,0,width,height);
@@ -69,13 +76,66 @@ void mouseReleased(){
  
  long[] HKR=toHKR(calculateHKR());
  noFill();
- stroke(#7B92ED,200);
+ stroke(#7B92ED);
  strokeWeight(10);
  ellipse(HKR[0],HKR[1],HKR[2]*2,HKR[2]*2);
-
+ noStroke();fill(0);
+ ellipse(HKR[0],HKR[1],5,5);
+ sumOfErrors=0;
+ for(int i=0;i<N;i++){
+   long x_c=x.get(i);
+   long y_c=y.get(i);
+   long r_c=(long)sqrt(pow((float)(x_c-HKR[0]),2)+pow((float)(y_c-HKR[1]),2));
+   sumOfErrors+=(abs(r_c-HKR[2]/2));
+   if(r_c-HKR[2]<-3){
+     stroke(#07DB68);
+     strokeWeight(1);
+     fill(#07DB68);
+     ellipse(x_c,y_c,20,20);
+     line(x_c,y_c,HKR[0],HKR[1]);
+     noFill();
+   }
+   else if(r_c-HKR[2]>3){
+     stroke(#DB071F);
+     strokeWeight(1);
+     fill(#DB071F);
+     ellipse(x_c,y_c,20,20);
+     line(x_c,y_c,HKR[0],HKR[1]);
+     noFill();
+   }
+   else if(r_c-HKR[2]>-3&&r_c-HKR[2]<3){
+     stroke(#0788DB);
+     strokeWeight(1);
+     fill(#0788DB);
+     ellipse(x_c,y_c,20,20);
+     line(x_c,y_c,HKR[0],HKR[1]);
+     noFill();
+   }
+ }
  println("N :" + N);
  println("R :" + HKR[2]);
-
+ println("S :" + sumOfErrors);
+ fill(#1A5C8E);
+  translate(20,6.4*height/7);
+  textAlign(LEFT);
+  textSize(30);
+  text("Radius : "+HKR[2] +"px",0,0);
+  text("Number of Points : " + N,0,30);
+  text("Sum of Errors : " + sumOfErrors,0,60);
+  translate(-20,-6.4*height/7);
+ }
+ else {
+   fill(255);
+ rectMode(CORNER);
+ noStroke();
+ rect(0,0,width,height);
+   fill(#FF030B);
+  translate(20,6.4*height/7);
+  textAlign(LEFT);
+  textSize(30);
+  text("Draw more than three points !!",0,90);
+  translate(-20,-6.4*height/7);
+ }
  init();
 }
 
